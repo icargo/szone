@@ -7,7 +7,7 @@
 //
 
 #import "AppDelegate.h"
-
+#import "LoginVC.h"
 @interface AppDelegate ()
 
 @end
@@ -17,6 +17,18 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    //    [application setStatusBarHidden:YES];
+    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    // Override point for customization after application launch.
+    self.window.backgroundColor = [UIColor whiteColor];
+    LoginVC *loginVC = [[LoginVC alloc]initWithNibName:@"LoginVC" bundle:nil];
+    UINavigationController *navi = [[UINavigationController alloc]initWithRootViewController:loginVC];
+    
+    //    [[NSUserDefaults standardUserDefaults] setObject:@"Chinese" forKey:@"language"];
+    //    [[NSUserDefaults standardUserDefaults] objectForKey:@"language"];
+    [self.window setRootViewController:navi];
+    [self.window makeKeyAndVisible];
+
     return YES;
 }
 
