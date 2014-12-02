@@ -8,7 +8,7 @@
 
 #import "ComboBox.h"
 
-#define INPUTTEXTFEILDHIEGHT  44
+#define INPUTTEXTFEILDHIEGHT  [[UIScreen mainScreen] bounds].size.width/8.4
 
 @interface ComboBox()
 

@@ -9,7 +9,7 @@
 #import "MainTabBarVC.h"
 #import "CustomTabButton.h"
 #import "BaseNaviVC.h"
-#import "PhotoVC.h"
+#import "PhotoCollectionVC.h"
 #import "PaizhaoVC.h"
 #import "MoreTableVC.h"
 #import "iCamera.h"
@@ -60,7 +60,7 @@
     [button addTarget:self action:@selector(backToFront) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:button];
 
-    PhotoVC *photosVC = [[PhotoVC alloc]init];
+    PhotoCollectionVC *photosVC = [[PhotoCollectionVC alloc]initWithNibName:@"PhotoCollectionVC" bundle:nil];
     PaizhaoVC *paizhaoVC = [[PaizhaoVC alloc]init];
     MoreTableVC *moreVC = [[MoreTableVC alloc]init];
     

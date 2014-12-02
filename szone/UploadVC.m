@@ -84,15 +84,13 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 -(void)uploadAction{//上传
-    UploadView *uploadView = [[UploadView alloc]initWithFrame:CGRectMake(-WIDTH, -WIDTH, WIDTH*7/8, HEIGHT*7/8)];
+    UploadView *uploadView = [[UploadView alloc]initWithFrame:CGRectMake(-WIDTH, -WIDTH/2, WIDTH*7/8, HEIGHT*7/8)];
     uploadView.layer.cornerRadius = 5;
     uploadView.layer.masksToBounds = YES;
     [self.view addSubview:uploadView];
     [UIView animateWithDuration:.3 animations:^ {
         uploadView.center = CGPointMake(WIDTH/2, HEIGHT/2);
-    }completion:^(BOOL finished){
-        self.view.alpha = .9;
-    }];
+    }completion:nil];
 }
 
 -(BOOL)prefersStatusBarHidden{
