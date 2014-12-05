@@ -41,6 +41,7 @@
         _inputTF = [[UITextField alloc] initWithFrame:CGRectMake(10, 0, frame.size.width-INPUTTEXTFEILDHIEGHT, INPUTTEXTFEILDHIEGHT)];
         _inputTF.delegate = self;
         _inputTF.font = [UIFont systemFontOfSize:20];
+        _inputTF.clearButtonMode = UITextFieldViewModeWhileEditing;
         _inputTF.borderStyle = UITextBorderStyleNone; // 设置文本框的边框风格,也可以使用none,设置背景图片
         [_inputTF addTarget:self action:@selector(edit:) forControlEvents:UIControlEventAllTouchEvents];
         

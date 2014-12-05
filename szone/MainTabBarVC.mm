@@ -5,6 +5,8 @@
 //  Created by zhuyq-MacBook Pro on 14/11/14.
 //  Copyright (c) 2014年 lewei.com. All rights reserved.
 //
+#define WIDTH [UIScreen mainScreen].bounds.size.width
+#define HEIGHT [UIScreen mainScreen].bounds.size.height
 
 #import "MainTabBarVC.h"
 #import "CustomTabButton.h"
@@ -14,8 +16,6 @@
 #import "MoreTableVC.h"
 #import "iCamera.h"
 
-#define WIDTH   [[UIScreen mainScreen] bounds].size.width
-#define HEIGHT  [[UIScreen mainScreen] bounds].size.height
 
 @interface MainTabBarVC ()<iCameraFunDelegate>
 @property (nonatomic,strong)UIImageView *tabBarView;

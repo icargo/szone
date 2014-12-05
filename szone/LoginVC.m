@@ -5,20 +5,20 @@
 //  Created by zhuyq-MacBook Pro on 14/11/10.
 //  Copyright (c) 2014年 lewei.com. All rights reserved.
 //
+#define WIDTH [UIScreen mainScreen].bounds.size.width
+#define HEIGHT [UIScreen mainScreen].bounds.size.height
 
+#import "AFHTTPRequestOperationManager.h"
+#import "CodingBase64.h"
 #import "LoginVC.h"
 #import "UserInfoVC.h"
 #import "MainTabBarVC.h"
-
 #import "ComboBox.h"
 
-#define WIDTH   [[UIScreen mainScreen] bounds].size.width
-#define HEIGHT  [[UIScreen mainScreen] bounds].size.height
 @interface LoginVC (){
     UIButton *cnBtn;
     UIButton *enBtn;
 }
-
 @property(nonatomic,strong)ComboBox *usernameBox;
 @property(nonatomic,strong)UITextField *passwordTF;
 @property(nonatomic,strong)NSMutableArray *loginBtns;
@@ -96,6 +96,9 @@
     passwordIV.userInteractionEnabled = YES;
     _passwordTF = [[UITextField alloc]initWithFrame:CGRectMake(10, 0, WIDTH*.82, WIDTH/8.4)];
     _passwordTF.placeholder = @"密码";
+    _passwordTF.keyboardType = UIKeyboardTypeNumbersAndPunctuation;
+    _passwordTF.clearButtonMode = UITextFieldViewModeWhileEditing;
+    _passwordTF.secureTextEntry = YES;
     [_passwordTF setFont:[UIFont systemFontOfSize:20]];
     [passwordIV addSubview:_passwordTF];
     
@@ -112,7 +115,7 @@
     NSArray *btnColors = @[[UIColor whiteColor],[UIColor darkTextColor],[UIColor darkTextColor]];
     for (int i = 0; i<3; i++) {
         UIButton* loginBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-        loginBtn.titleLabel.font = [UIFont systemFontOfSize:20];
+        loginBtn.titleLabel.font = [UIFont boldSystemFontOfSize:20];//设置按钮标题为粗体
         [loginBtn setBackgroundImage:[UIImage imageNamed:btnImages[i]] forState:UIControlStateNormal];
         [loginBtn setTitleColor:btnColors[i] forState:UIControlStateNormal];
         [loginBtn setTitle:_cnTitles[i] forState:UIControlStateNormal];
@@ -166,12 +169,33 @@
 }
 -(void)didExitInput:(UITextField*)sender{
     [sender resignFirstResponder];
+    [_passwordTF becomeFirstResponder];
 }
 
 -(void)clicked:(UIButton*)btn{
     UserInfoVC *userInfoVC = [[UserInfoVC alloc]initWithNibName:@"UserInfoVC" bundle:nil];
     switch (btn.tag) {
         case 0://登录
+            {
+            NSString *password = [CodingBase64 encodeString:_passwordTF.text];
+                
+            NSDictionary *authParams = @{@"LoginName":_usernameBox.inputTF.text,@"Password":password};
+                NSLog(@"%@",authParams);
+            AFHTTPRequestOperationManager* httpManager = [AFHTTPRequestOperationManager manager];//创建HTTP请求对象
+            [httpManager setResponseSerializer:[AFHTTPResponseSerializer serializer]];//去掉智能转换
+            httpManager.requestSerializer = [AFJSONRequestSerializer serializer];//设置请求类型
+            httpManager.responseSerializer = [AFJSONResponseSerializer serializer];//指定返回类型
+
+            [httpManager POST:@"http://182.254.228.203:8080/api/auth" parameters:authParams success:^(AFHTTPRequestOperation *operation, id responseObject) {
+                NSLog(@"responseObject:%@",responseObject);
+                NSString *sessionKey = [responseObject valueForKey:@"SessionKey"];
+                NSLog(@"登陆成功 sessionKey:%@",sessionKey);
+            } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+                NSString *response = [operation valueForKey:@"response"];
+                if (response) NSLog(@"账号或密码错误 response:%@",response);
+                else NSLog(@"网络连接失败 response:%@",response);
+            }];
+        }
             break;
         case 1://注册
             [self.navigationController pushViewController:userInfoVC animated:YES];

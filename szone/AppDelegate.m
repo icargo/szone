@@ -21,7 +21,7 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
     self.window.backgroundColor = [UIColor whiteColor];
-    LoginVC *loginVC = [[LoginVC alloc]initWithNibName:@"LoginVC" bundle:nil];
+    LoginVC *loginVC = [[LoginVC alloc]init];
     UINavigationController *navi = [[UINavigationController alloc]initWithRootViewController:loginVC];
     
     //    [[NSUserDefaults standardUserDefaults] setObject:@"Chinese" forKey:@"language"];

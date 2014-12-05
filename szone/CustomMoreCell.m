@@ -23,15 +23,15 @@
     return self;
 }
 - (void)awakeFromNib {
-    _leftIV = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, 26, 26)];
-    _leftIV.center = CGPointMake(30, (HEIGHT-92)/18);
-    _textLb = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 120, 30)];
-    _textLb.center = CGPointMake(115, (HEIGHT-92)/18);
+    _leftIV = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, HEIGHT/25, HEIGHT/25)];
+    _leftIV.center = CGPointMake(WIDTH/11, (HEIGHT-92)/18);
+    _textLb = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, WIDTH/2.5, 30)];
+    _textLb.center = CGPointMake(WIDTH/2.8, (HEIGHT-92)/18);
     _textLb.textAlignment = NSTextAlignmentLeft;
-    _textLb.font = [UIFont systemFontOfSize:18];
+    _textLb.font = [UIFont systemFontOfSize:HEIGHT/32];
     
-    _indicatorIV = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, 15, 23)];
-    _indicatorIV.center = CGPointMake(WIDTH-30, (HEIGHT-92)/18);
+    _indicatorIV = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, HEIGHT/44, HEIGHT/27)];
+    _indicatorIV.center = CGPointMake(WIDTH/1.08, (HEIGHT-92)/18);
     _indicatorIV.image = [UIImage imageNamed:@"cell_jiantou"];
     
     [self.contentView addSubview:_leftIV];

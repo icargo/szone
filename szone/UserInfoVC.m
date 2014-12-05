@@ -5,17 +5,23 @@
 //  Created by zhuyq-MacBook Pro on 14/11/11.
 //  Copyright (c) 2014年 lewei.com. All rights reserved.
 //
+#define WIDTH [UIScreen mainScreen].bounds.size.width
+#define HEIGHT [UIScreen mainScreen].bounds.size.height
 
+#import "AFHTTPRequestOperationManager.h"
 #import "UserInfoVC.h"
 #import "MainTabBarVC.h"
+#import "CodingBase64.h"
 
-#define WIDTH   [[UIScreen mainScreen] bounds].size.width
-#define HEIGHT  [[UIScreen mainScreen] bounds].size.height
 @interface UserInfoVC ()
 
 @property(nonatomic,strong)NSArray *sexImages;
 @property(nonatomic,strong)NSMutableArray *sexBtns;
+@property(nonatomic,strong)NSMutableArray *userInfoTFs;
 @property(nonatomic,strong)NSMutableArray *userTFs;
+@property(nonatomic,strong)UITextField *nameTF;
+@property(nonatomic)int sex;
+
 @end
 
 @implementation UserInfoVC
@@ -24,7 +30,9 @@
     [super viewDidLoad];
     _sexBtns = [NSMutableArray array];
     _userTFs = [NSMutableArray array];
+    _userInfoTFs = [NSMutableArray array];
     self.title = @"用户信息";
+    _sex = 1;
     UINavigationBar *naviBar = self.navigationController.navigationBar;
     [naviBar setBackgroundImage:[UIImage imageNamed:@"navi_bar"] forBarMetrics:UIBarMetricsDefault];
     [naviBar setTitleTextAttributes:@{NSForegroundColorAttributeName: [UIColor whiteColor],NSFontAttributeName:[UIFont boldSystemFontOfSize:20.0]}];
@@ -55,13 +63,14 @@
     NSArray *userStrings = @[@"用户",@"密码",@"姓名",@"出生年月"];
     NSArray *userPlaceholders = @[@"请输入用户名",@"请输入密码",@"请输入姓名"];
     NSArray *sexTexts = @[@"性别",@"男",@"女"];
+    NSArray *birthTexts = @[@"年",@"月",@"日"];
     _sexImages = @[@"sex_sel",@"sex"];
     for (int i = 0; i<8; i++) {
 //添加中间标签、性别按钮
         if (i<3) {
             UILabel *sexLb = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, WIDTH/8, WIDTH/10)];
             sexLb.center = CGPointMake(WIDTH/7+i*WIDTH/3.5, WIDTH/1.9);
-            sexLb.font = [UIFont systemFontOfSize:15];
+            sexLb.font = [UIFont systemFontOfSize:16];
             sexLb.text = sexTexts[i];
             [bgSV addSubview:sexLb];
         }
@@ -81,13 +90,18 @@
             
             UITextField *userTF = [[UITextField alloc]initWithFrame:CGRectMake(WIDTH/4, 0, WIDTH/2.8, WIDTH/10)];
             userTF.placeholder = userPlaceholders[i];
-            userTF.font = [UIFont systemFontOfSize:14];
+            userTF.font = [UIFont systemFontOfSize:15];
             userTF.borderStyle = UITextBorderStyleNone;
-            userTF.tag = i-1;
-            [userTF addTarget:self action:@selector(exitInput:) forControlEvents:UIControlEventEditingDidEndOnExit];
+            userTF.clearButtonMode = UITextFieldViewModeWhileEditing;
+            userTF.tag = i;
+            [userTF addTarget:self action:@selector(didExitInput:) forControlEvents:UIControlEventEditingDidEndOnExit];
+            if (i==1) {
+                userTF.secureTextEntry = YES;
+            }
+            [_userTFs addObject:userTF];
             
             UILabel *userLb = [[UILabel alloc]initWithFrame:CGRectMake(6, 0, WIDTH/8, WIDTH/10)];
-            userLb.font = [UIFont systemFontOfSize:14];
+            userLb.font = [UIFont systemFontOfSize:15];
             userLb.textAlignment = NSTextAlignmentLeft;
             userLb.text = userStrings[i];
             
@@ -101,19 +115,36 @@
             nameIV.userInteractionEnabled = YES;
             
             UILabel *nameLb = [[UILabel alloc]initWithFrame:CGRectMake(6, 0, WIDTH/5, WIDTH/10)];
-            nameLb.font = [UIFont systemFontOfSize:14];
+            nameLb.font = [UIFont systemFontOfSize:15];
             nameLb.textAlignment = NSTextAlignmentLeft;
             nameLb.text = userStrings[i+2];
-            
-            if (i==0) {
-                UITextField *nameTF = [[UITextField alloc]initWithFrame:CGRectMake(WIDTH/3, 0, WIDTH/2, WIDTH/10)];
-                nameTF.placeholder = [userPlaceholders lastObject];
-                nameTF.font = [UIFont systemFontOfSize:14];
-                nameTF.textAlignment = NSTextAlignmentLeft;
-                nameTF.borderStyle = UITextBorderStyleNone;
-                [nameIV addSubview:nameTF];
-            }
             [nameIV addSubview:nameLb];
+            if (i==0) {
+                _nameTF = [[UITextField alloc]initWithFrame:CGRectMake(WIDTH/3, 0, WIDTH/1.75, WIDTH/10)];
+                _nameTF.placeholder = [userPlaceholders lastObject];
+                _nameTF.font = [UIFont systemFontOfSize:15];
+                _nameTF.textAlignment = NSTextAlignmentLeft;
+                _nameTF.borderStyle = UITextBorderStyleNone;
+                _nameTF.clearButtonMode = UITextFieldViewModeWhileEditing;
+                _nameTF.tag = 2;
+                [_nameTF addTarget:self action:@selector(didExitInput:) forControlEvents:UIControlEventEditingDidEndOnExit];
+                [nameIV addSubview:_nameTF];
+            }
+            if (i==1) {
+                for (int i=0; i<3; i++) {
+                    UIButton *birthBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+                    birthBtn.frame = CGRectMake(WIDTH/4+WIDTH/5*i, 0, WIDTH/5, WIDTH/10);
+                    UILabel *birthLabel = [[UILabel alloc]initWithFrame: CGRectMake(0, 0, WIDTH/5, WIDTH/10)];
+                    birthLabel.text = birthTexts[i];
+                    birthLabel.textColor = [UIColor darkTextColor];
+                    birthLabel.font = [UIFont systemFontOfSize:15];
+                    birthLabel.textAlignment = NSTextAlignmentRight;
+                    birthBtn.tag = i;
+                    [birthBtn addTarget:self action:@selector(chooseBirth:) forControlEvents:UIControlEventTouchUpInside];
+                    [birthBtn addSubview:birthLabel];
+                    [nameIV addSubview:birthBtn];
+                }
+            }
             [bgSV addSubview:nameIV];
         }
 //添加8个用户信心输入框
@@ -123,30 +154,30 @@
         userInfoIV.image = [UIImage imageNamed:@"text_long"];
         
         UILabel *userInfoLb = [[UILabel alloc]initWithFrame:CGRectMake(6, 0, WIDTH/4, WIDTH/10)];
-        userInfoLb.font = [UIFont systemFontOfSize:14];
+        if (i==2) {
+            [userInfoLb setFrame:CGRectMake(6, 0, WIDTH/3.2, WIDTH/10)];
+        }
+        userInfoLb.font = [UIFont systemFontOfSize:15];
         userInfoLb.textAlignment = NSTextAlignmentLeft;
         userInfoLb.text = userInfoTexts[i];
         [userInfoIV addSubview:userInfoLb];
         
-        UITextField *userInfoTF = [[UITextField alloc]initWithFrame:CGRectMake(WIDTH/3, 0, WIDTH/2, WIDTH/10)];
+        UITextField *userInfoTF = [[UITextField alloc]initWithFrame:CGRectMake(WIDTH/3, 0, WIDTH/1.75, WIDTH/10)];
         userInfoTF.placeholder = userInfoPlaceholders[i];
-        userInfoTF.font = [UIFont systemFontOfSize:14];
+        userInfoTF.font = [UIFont systemFontOfSize:15];
         userInfoTF.textAlignment = NSTextAlignmentLeft;
         userInfoTF.borderStyle = UITextBorderStyleNone;
+        userInfoTF.clearButtonMode = UITextFieldViewModeWhileEditing;
+        if (i==0||i==7) {
+            userInfoTF.keyboardType = UIKeyboardTypeNumbersAndPunctuation;
+        }
         userInfoTF.tag = i;
         [userInfoTF addTarget:self action:@selector(exitInput:) forControlEvents:UIControlEventEditingDidEndOnExit];
-        [_userTFs  addObject:userInfoTF];
+        [_userInfoTFs  addObject:userInfoTF];
         
         [userInfoIV addSubview:userInfoTF];
         [bgSV addSubview:userInfoIV];
     }
-
-    UIButton *birthYearBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    UIButton *birthMonthBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    [birthYearBtn setTitle:@"年" forState:UIControlStateNormal];
-    [birthMonthBtn setTitle:@"月" forState:UIControlStateNormal];
-    [birthMonthBtn addTarget:self action:@selector(chooseBirth:) forControlEvents:UIControlEventTouchUpInside];
-    [birthYearBtn addTarget:self action:@selector(chooseBirth:) forControlEvents:UIControlEventTouchUpInside];
     
 //保存按钮
     UIButton* saveBtn = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -162,10 +193,16 @@
 -(void)backAction{//返回
     [self.navigationController popViewControllerAnimated:YES];
 }
--(void)exitInput:(UITextField*)sender{
-    [sender resignFirstResponder];//点击收起键盘
+-(void)didExitInput:(UITextField*)sender{
     if (sender.tag+1<_userTFs.count) {
         [_userTFs[sender.tag+1] becomeFirstResponder];
+    }else if (sender.tag==1)[_nameTF becomeFirstResponder];
+    else [_userInfoTFs[0] becomeFirstResponder];
+}
+-(void)exitInput:(UITextField*)sender{
+    [sender resignFirstResponder];//点击收起键盘
+    if (sender.tag+1<_userInfoTFs.count) {
+        [_userInfoTFs[sender.tag+1] becomeFirstResponder];
     }
 }
 -(void)viewWillAppear:(BOOL)animated{//显示naviBar
@@ -177,19 +214,67 @@
 -(void)chooseMale:(UIButton*)btn{
     [btn setImage:[UIImage imageNamed:@"sex_sel"] forState:UIControlStateNormal];
     switch (btn.tag) {
-        case 0://男
+        case 0: _sex = 1;
             [_sexBtns[1] setImage:[UIImage imageNamed:@"sex"] forState:UIControlStateNormal];
             break;
-        case 1://女
+        case 1: _sex = 0;
             [_sexBtns[0] setImage:[UIImage imageNamed:@"sex"] forState:UIControlStateNormal];
             break;
     }
 }
 
--(void)saveUserInfo{//保存信息
-    
+-(void)chooseBirth:(UIButton*)btn{
+    switch (btn.tag) {
+        case 0:
+            NSLog(@"年");
+            break;
+        case 1:
+            NSLog(@"月");
+            break;
+    }
 }
 
+-(NSDictionary*)getRegisterParamsByUserInfo{
+    
+    NSMutableDictionary *userInfoDic = [NSMutableDictionary dictionary];
+    UITextField *usernameTF = _userTFs[0];
+    UITextField *passwordTF = _userTFs[1];
+    NSString *password = [CodingBase64 encodeString:passwordTF.text];
+    
+    NSString *headString = [CodingBase64 encodeImageToString:[UIImage imageNamed:@""]];
+    [userInfoDic setObject:headString forKey:@"Image"];
+    [userInfoDic setObject:usernameTF.text forKey:@"LoginName"];
+    [userInfoDic setObject:password forKey:@"Password"];
+    [userInfoDic setObject:@"" forKey:@"DocKey"];
+    [userInfoDic setObject:_nameTF.text forKey:@"Name"];
+    [userInfoDic setObject:@(_sex) forKey:@"Gender"];
+    [userInfoDic setObject:@"2000-01-01" forKey:@"Birthday"];
+    NSArray *keys = @[@"Phone",@"Email",@"SocialNumber",@"MedicalHistory",@"AllergyHistory",@"DoctorName",@"DoctorEmail",@"DoctorPhone"];
+    for (int i = 0; i<_userInfoTFs.count; i++) {
+        UITextField *userInfo = _userInfoTFs[i];
+        [userInfoDic setObject:userInfo.text forKey:keys[i]];
+    }
+    return userInfoDic;
+}
+-(void)saveUserInfo{//保存信息
+    NSDictionary *userInfoParams = [self getRegisterParamsByUserInfo];
+//    NSString *userInfoParams = [userInfoDic JSONString];
+    NSLog(@"参数:%@",userInfoParams);
+    AFHTTPRequestOperationManager* httpManager = [AFHTTPRequestOperationManager manager];//创建HTTP请求对象
+    [httpManager setResponseSerializer:[AFHTTPResponseSerializer serializer]];//去掉智能转换
+    httpManager.requestSerializer = [AFJSONRequestSerializer serializer];//设置请求类型
+    httpManager.responseSerializer = [AFJSONResponseSerializer serializer];//指定返回类型
+    
+    [httpManager POST:@"http://182.254.228.203:8080/api/user" parameters:userInfoParams success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSLog(@"注册成功,祝您使用愉快!responseObject:%@",responseObject);
+
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"operation:%@",operation);
+        NSString *response = [operation valueForKey:@"response"];
+        if (response) NSLog(@"注册失败,请您重新注册! response:%@",response);
+        else NSLog(@"网络连接失败 response:%@",response);
+    }];
+}
 
 
 @end
