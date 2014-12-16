@@ -14,6 +14,8 @@
 #import "UserInfoVC.h"
 #import "MainTabBarVC.h"
 #import "ComboBox.h"
+#import "SVProgressHUD.h"
+
 
 @interface LoginVC (){
     UIButton *cnBtn;
@@ -33,12 +35,14 @@
 }
 -(void)viewWillAppear:(BOOL)animated{//隐藏naviBar
     self.navigationController.navigationBarHidden = YES;
+
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     _loginBtns = [NSMutableArray array];
     [self initUI];
+
 }
 -(void)initUI{
 //添加背景、手势
@@ -187,13 +191,18 @@
             httpManager.responseSerializer = [AFJSONResponseSerializer serializer];//指定返回类型
 
             [httpManager POST:@"http://182.254.228.203:8080/api/auth" parameters:authParams success:^(AFHTTPRequestOperation *operation, id responseObject) {
-                NSLog(@"responseObject:%@",responseObject);
+                [SVProgressHUD showSuccessWithStatus:@"登陆成功" duration:1];
                 NSString *sessionKey = [responseObject valueForKey:@"SessionKey"];
-                NSLog(@"登陆成功 sessionKey:%@",sessionKey);
+                NSUserDefaults *userDef = [NSUserDefaults standardUserDefaults];
+                [userDef setObject:sessionKey forKey:@"SessionKey"];
+                [userDef setObject:_usernameBox.inputTF.text forKey:@"LoginName"];
+                NSLog(@"sessionKey:%@",sessionKey);
+                MainTabBarVC *mainTabBarVC = [[MainTabBarVC alloc]initWithNibName:@"MainTabBarVC" bundle:nil];
+                [self presentViewController:mainTabBarVC animated:YES completion:nil];
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                 NSString *response = [operation valueForKey:@"response"];
-                if (response) NSLog(@"账号或密码错误 response:%@",response);
-                else NSLog(@"网络连接失败 response:%@",response);
+                if (response) [SVProgressHUD showErrorWithStatus:@"账号或密码错误"];
+                else [SVProgressHUD showErrorWithStatus:@"网络连接失败" duration:2];
             }];
         }
             break;

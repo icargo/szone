@@ -17,11 +17,12 @@
 #import "iCamera.h"
 
 
-@interface MainTabBarVC ()<iCameraFunDelegate>
+@interface MainTabBarVC ()<FuncDelegate>
 @property (nonatomic,strong)UIImageView *tabBarView;
 @property (nonatomic,strong)UIButton *selectedBtn;
 @property (nonatomic,strong)iCamera *iCamera;
 @property (nonatomic)BOOL isCamera;
+@property (nonatomic,strong)PaizhaoVC *paizhaoVC;
 @end
 
 @implementation MainTabBarVC
@@ -46,7 +47,7 @@
 }
 -(void)viewDidAppear:(BOOL)animated{
     [_iCamera iCameraServerStart];//开启WiFi模块
-    //[_iCamera iCameraAudioPlay];
+    [_iCamera iCameraAudioPlay];
 }
 -(void)viewDidDisappear:(BOOL)animated{
     [_iCamera iCameraImgStop];
@@ -61,10 +62,10 @@
     [self.view addSubview:button];
 
     PhotoCollectionVC *photosVC = [[PhotoCollectionVC alloc]initWithNibName:@"PhotoCollectionVC" bundle:nil];
-    PaizhaoVC *paizhaoVC = [[PaizhaoVC alloc]init];
+    _paizhaoVC = [[PaizhaoVC alloc]init];
     MoreTableVC *moreVC = [[MoreTableVC alloc]init];
     
-    NSArray *views = @[photosVC,paizhaoVC,moreVC];
+    NSArray *views = @[photosVC,_paizhaoVC,moreVC];
     NSMutableArray *viewControllers = [NSMutableArray array];
     for (UIViewController*view in views) {
         BaseNaviVC *navi = [[BaseNaviVC alloc]initWithRootViewController:view];
@@ -133,9 +134,8 @@
     }
 }
 -(void)paizhao{
-    [iCamera SnapPhoto:true :true];
-    NSString *nstrPath=[iCamera documentsPath:@"Image"];
-    NSLog(@"拍照了:%@",nstrPath);
+    //[iCamera SnapPhoto:true :true];
+    [_paizhaoVC snapshot];
 }
 
 

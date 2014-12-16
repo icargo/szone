@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "iCamera.h"
-@interface PaizhaoVC : UIViewController <iCameraFunDelegate>
+@interface PaizhaoVC : UIViewController <FuncDelegate>
 @property(nonatomic,strong)iCamera *iCamera;
+-(void)snapshot;
 @end

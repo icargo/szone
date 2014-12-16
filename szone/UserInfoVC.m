@@ -8,10 +8,12 @@
 #define WIDTH [UIScreen mainScreen].bounds.size.width
 #define HEIGHT [UIScreen mainScreen].bounds.size.height
 
-#import "AFHTTPRequestOperationManager.h"
 #import "UserInfoVC.h"
 #import "MainTabBarVC.h"
 #import "CodingBase64.h"
+#import "AFHTTPRequestOperationManager.h"
+#import "UIView+Toast.h"
+#import "SVProgressHUD.h"
 
 @interface UserInfoVC ()
 
@@ -263,16 +265,17 @@
     AFHTTPRequestOperationManager* httpManager = [AFHTTPRequestOperationManager manager];//创建HTTP请求对象
     [httpManager setResponseSerializer:[AFHTTPResponseSerializer serializer]];//去掉智能转换
     httpManager.requestSerializer = [AFJSONRequestSerializer serializer];//设置请求类型
-    httpManager.responseSerializer = [AFJSONResponseSerializer serializer];//指定返回类型
+    //httpManager.responseSerializer = [AFJSONResponseSerializer serializer];//指定返回类型
     
     [httpManager POST:@"http://182.254.228.203:8080/api/user" parameters:userInfoParams success:^(AFHTTPRequestOperation *operation, id responseObject) {
-        NSLog(@"注册成功,祝您使用愉快!responseObject:%@",responseObject);
+         NSDictionary *registerInfo = [NSJSONSerialization JSONObjectWithData:responseObject options:0 error:nil];
+        [self.view makeToast:@"注册成功,祝您使用愉快!" duration:2 position:@"center"];
+        NSLog(@"registerInfo:%@",registerInfo);
 
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"operation:%@",operation);
         NSString *response = [operation valueForKey:@"response"];
-        if (response) NSLog(@"注册失败,请您重新注册! response:%@",response);
-        else NSLog(@"网络连接失败 response:%@",response);
+        if (response) [SVProgressHUD showErrorWithStatus:@"注册失败,请您重新注册!"];
+        else [SVProgressHUD showErrorWithStatus:@"网络连接失败" duration:2];
     }];
 }
 

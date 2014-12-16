@@ -24,8 +24,6 @@
     LoginVC *loginVC = [[LoginVC alloc]init];
     UINavigationController *navi = [[UINavigationController alloc]initWithRootViewController:loginVC];
     
-    //    [[NSUserDefaults standardUserDefaults] setObject:@"Chinese" forKey:@"language"];
-    //    [[NSUserDefaults standardUserDefaults] objectForKey:@"language"];
     [self.window setRootViewController:navi];
     [self.window makeKeyAndVisible];
 

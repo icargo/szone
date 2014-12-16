@@ -13,71 +13,113 @@
 #include <map>
 using namespace std;
 
-#define CMD_SET_WIFI_NAME                           0x01
-#define CMD_SET_WIFI_PASSWORD                       0x02
-#define CMD_SET_WIFI_CLEAR_PASSWORD                 0x03
-#define CMD_SET_REBOOT                              0x04
-#define CMD_UART_SENDDATA                           0x05
-#define CMD_SET_VGA                                 0x06
-#define CMD_SET_QVGA                                0x07
-#define CMD_UART_RECVDATA                           0x08
-#define CMD_UART_SET_WIFI_NAME_RESULT               0x09
-#define CMD_UART_SET_WIFI_PASSWORD_RESULT           0x0a
-#define CMD_UART_CLEAR_WIFI_PASSWORD_RESULT         0x0b
-#define CMD_SET_CAMERA_RESOLUTION                   0x0d
-#define CMD_SET_CAMERA_RESOLUTION_RESULT            0x0e
-#define CMD_SET_NULL                                0x0f
-#define CMD_LIMITED                                 0x10
-
-
-
-enum CMDRESULT
-{
-    CMDRESULT_SET_FAIL=0,
-    CMDRESULT_SET_SUCCESS=1,
-};
-
+#define KEY1 0x01
+#define KEY2 0x02
+#define KEY3 0x04
+#define KEY4 0x08
+#define KEY5 0x10
+#define KEY6 0x20
+#define KEY7 0x40
+#define KEY8 0x80
 
 struct  FilePathInfo{
-	string m_strName;
-	string m_strFullPath;
-	bool   m_bFind;	//¥”…Ë±∏±Ì÷–’“µΩ¡À¬∑æ∂.
+    string m_strName;
+    string m_strFullPath;
+    bool   m_bFind;	//¥”…Ë±∏±Ì÷–’“µΩ¡À¬∑æ∂.
 };
 
 struct FolderInfo
 {
-	FilePathInfo m_path;
-	vector<FilePathInfo >m_filesPath;
+    FilePathInfo m_path;
+    vector<FilePathInfo >m_filesPath;
 };
 
-@protocol iCameraFunDelegate <NSObject>
+@protocol FuncDelegate <NSObject>
 @optional
-- (void) DidSetWifiNameResult:(unsigned char)result;
-- (void) DidSetWifiPasswordResult:(unsigned char)result;
-- (void) DidClearWifiPasswordResult:(unsigned char)result;
-- (void) DidRebootResult:(unsigned char)result;
-- (void) DidSetVGAResult:(unsigned char)result;
-- (void) DidSetQVGAResult:(unsigned char)result;
-- (void) DidRecvUartData:(unsigned char*)buf :(int)length;
-- (void) DidLimitedResult;
-
-
-
-
-
+- (void) DidKey1;
+- (void) DidKey2;
+- (void) DidKey3;
+- (void) DidKey4;
+- (void) DidKey5;
+- (void) DidKey6;
+- (void) DidKey7;
+- (void) DidKey8;
+- (void) DidUpdateImg;
 @end
 
 
-@interface iCamera : NSObject<iCameraFunDelegate>
+@interface iCamera : NSObject<FuncDelegate>
 {
     UIImageView *i_imgview;
-
+    UISlider *sliderBrightness;
+    UISlider *sliderContrast;
+    UISlider *sliderHue;
+    UISlider *sliderSaturation;
+    UISlider *sliderSharpness;
+    UISlider *sliderGain;
+    
+    int minimumValBrightness;
+    int maximumValBrightness;
+    int defaultValBrightness;
+    int stepValBrightness;
+    int curValBrightness;
+    
+    int set_curValBrightness;
+    
+    int minimumValContrast;
+    int maximumValContrast;
+    int defaultValContrast;
+    int stepValContrast;
+    int curValContrast;
+    
+    int set_curValContrast;
+    
+    
+    int minimumValHue;
+    int maximumValHue;
+    int defaultValHue;
+    int stepValHue;
+    int curValHue;
+    
+    int set_curValHue;
+    
+    
+    int minimumValSaturation;
+    int maximumValSaturation;
+    int defaultValSaturation;
+    int stepValSaturation;
+    int curValSaturation;
+    
+    int set_curValSaturation;
+    
+    
+    int minimumValSharpness;
+    int maximumValSharpness;
+    int defaultValSharpness;
+    int stepValSharpness;
+    int curValSharpness;
+    
+    int set_curValSharpness;
+    
+    
+    int minimumValGain;
+    int maximumValGain;
+    int defaultValGain;
+    int stepValGain;
+    int curValGain;
+    
+    int set_curValGain;
+    
+    bool setCameraParamflag;
+    bool getCameraParamflag;
+    
     
     unsigned int saveRecordTime;
     
+    unsigned char keyStatus;
 }
 
-@property (assign, nonatomic)  id<iCameraFunDelegate> iCameraDelegate;
+@property (assign, nonatomic)  id<FuncDelegate> iCameraDelegate;
 
 
 - (id)init;
@@ -89,6 +131,18 @@ struct FolderInfo
 - (void) iCameraImgStop;
 - (void) iCameraAudioPlay;
 - (void) iCameraAudioStop;
+
+- (void) iCameraCameraParamServerStart :(UISlider *)slider_Brightness :(UISlider *)slider_Contrast :(UISlider *)slider_Hue :(UISlider *)slider_Saturation :(UISlider *)slider_Sharpness :(UISlider *)slider_Gain;
+
+- (void) iCameraCameraSetAllParam:(float)val_Brightness :(float)val_Contrast :(float)val_Hue :(float)val_Saturation :(float)val_Sharpness :(float)val_Gain;
+
+
+- (void) iCameraCameraParamServerStop;
+
+
+- (bool)iCameraResetParam;
+
+
 
 +(NSString *)strToNsstr:(string)strName;
 +(NSString *)documentsPath:(NSString *)fileName;
@@ -106,9 +160,67 @@ struct FolderInfo
 - (void) iCameraRecStart;
 - (void) iCameraRecStop;
 - (bool) iCameraGetisRecording;
+- (bool) iCameraSetWifiName: (unsigned char *)name;
+- (bool) iCameraSetWifiPassword: (unsigned char *)password;
+- (bool) iCameraSetWifiClearPassword;
+- (bool) iCameraSetReboot;
+- (bool) iCameraSetOpenSerial;
+- (bool) iCameraSetCloseSerial;
+- (void) iCameraKeyDetectStart;
+- (void) iCameraKeyDetectStop;
+- (void) iCameraKeyStatus:(unsigned char)status;
+- (unsigned char) iCameraGetKeyStatus;
 
-- (int) iCameraInsertCmd:(int)times :(unsigned char)cmd;
-- (int) iCameraInsertCmdData: (unsigned char*)buf :(unsigned char)length :(int)times :(unsigned char)cmd;
+
+
+
+- (bool) iCameraSetCameraResolution: (int)width :(int)height :(int) fps;
+- (bool) iCameraGetCameraResolution: (unsigned char *)resolutionList;
+- (bool) iCameraAddBrightness;
+- (bool) iCameraSubBrightness;
+- (bool) iCameraAddContrast;
+- (bool) iCameraSubContrast;
+- (bool) iCameraAddGain;
+- (bool) iCameraSubGain;
+- (bool) iCameraAddStaturation;
+- (bool) iCameraSubStaturation;
+- (bool) iCameraAddSharpness;
+- (bool) iCameraSubSharpness;
+- (void) iCameraGetImageWidth:(unsigned int*)width Height:(unsigned int*)height;
+
+
+- (bool) iCameraGetCameraBrightness: (int *)minimumVal :(int *)maximumVal :(int *) defaultVal :(int *) stepVal :(int *) curVal;
+- (bool) iCameraGetCameraContrast: (int *)minimumVal :(int *)maximumVal :(int *) defaultVal :(int *) stepVal :(int *) curVal;
+- (bool) iCameraGetCameraHue: (int *)minimumVal :(int *)maximumVal :(int *) defaultVal :(int *) stepVal :(int *) curVal;
+- (bool) iCameraGetCameraGain: (int *)minimumVal :(int *)maximumVal :(int *) defaultVal :(int *) stepVal :(int *) curVal;
+- (bool) iCameraGetCameraStaturation: (int *)minimumVal :(int *)maximumVal :(int *) defaultVal :(int *) stepVal :(int *) curVal;
+- (bool) iCameraGetCameraSharpness: (int *)minimumVal :(int *)maximumVal :(int *) defaultVal :(int *) stepVal :(int *) curVal;
+- (bool) iCameraGetCameraGamma: (int *)minimumVal :(int *)maximumVal :(int *) defaultVal :(int *) stepVal :(int *) curVal;
+- (bool) iCameraGetCameraWhiteBalanceTemperature: (int *)minimumVal :(int *)maximumVal :(int *) defaultVal :(int *) stepVal :(int *) curVal;
+- (bool) iCameraGetCameraBacklightCompensation: (int *)minimumVal :(int *)maximumVal :(int *) defaultVal :(int *) stepVal :(int *) curVal;
+
+
+- (bool)iCameraAddCameraBrightness;
+- (bool)iCameraAddCameraContrast;
+- (bool)iCameraAddCameraHue;
+- (bool)iCameraAddCameraGain;
+- (bool)iCameraAddCameraSaturation;
+- (bool)iCameraAddCameraSharpness;
+- (bool)iCameraAddCameraWhiteBalanceTemperature;
+- (bool)iCameraAddCameraBacklightCompensation;
+
+- (bool)iCameraSubCameraBrightness;
+- (bool)iCameraSubCameraContrast;
+- (bool)iCameraSubCameraHue;
+- (bool)iCameraSubCameraGain;
+- (bool)iCameraSubCameraSaturation;
+- (bool)iCameraSubCameraSharpness;
+- (bool)iCameraSubCameraGamma;
+- (bool)iCameraSubCameraWhiteBalanceTemperature;
+- (bool)iCameraSubCameraBacklightCompensation;
+- (bool)iCameraGetFuncKeyVal :(unsigned char *)value :(int *)length;
+
+
 
 @end
 

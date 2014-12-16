@@ -10,9 +10,9 @@
 
 #import "MoreTableVC.h"
 #import "CustomMoreCell.h"
-
 #import "UploadVC.h"
-
+#import "AFHTTPRequestOperationManager.h"
+#import "SVProgressHUD.h"
 @interface MoreTableVC () 
 @property(nonatomic,strong)NSArray *images;
 @property(nonatomic,strong)NSArray *infoStrings;
@@ -73,6 +73,7 @@
         case 7:
             break;
         case 8:
+            [self logoutAction];
             break;
     }
 }
@@ -80,7 +81,30 @@
     return (HEIGHT-92)/9;
 }
 
+-(void)logoutAction{
+    NSUserDefaults *userDef = [NSUserDefaults standardUserDefaults];
+    NSDictionary *authParams = @{@"LoginName":[userDef objectForKey:@"LoginName"],@"SessionKey":[userDef objectForKey:@"SessionKey"]};
+    NSLog(@"authParams:%@",authParams);
+    AFHTTPRequestOperationManager* httpManager = [AFHTTPRequestOperationManager manager];//创建HTTP请求对象
+    [httpManager setResponseSerializer:[AFHTTPResponseSerializer serializer]];//去掉智能转换
+    httpManager.requestSerializer = [AFJSONRequestSerializer serializer];//设置请求类型
+    //httpManager.responseSerializer = [AFJSONResponseSerializer serializer];//指定返回类型
+    
+    [httpManager DELETE:@"http://182.254.228.203:8080/api/auth" parameters:authParams success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        [userDef removeObjectForKey:@"LoginName"];
+        [userDef removeObjectForKey:@"SessionKey"];
+        [userDef synchronize];
+        NSDictionary *logoutInfo = [NSJSONSerialization JSONObjectWithData:responseObject options:0 error:nil];
+        NSLog(@"logoutInfo:%@",logoutInfo);
+        [SVProgressHUD showSuccessWithStatus:@"注销成功"];
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"operation:%@",operation);
+        NSString *response = [operation valueForKey:@"response"];
+        if (response) [SVProgressHUD showErrorWithStatus:@"注销失败"];
+        else [SVProgressHUD showErrorWithStatus:@"网络连接失败" duration:2];
+    }];
 
+}
 /*
 // Override to support editing the table view.
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {

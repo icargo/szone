@@ -54,7 +54,7 @@ static NSString * const reuseIdentifier = @"Cell";
             NSLog(@"照片路径%@",filePath);
             [_photoPaths addObject:filePath];
         }   
-    }
+    } 
 }
 
 -(BOOL)prefersStatusBarHidden{
